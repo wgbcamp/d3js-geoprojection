@@ -138,7 +138,7 @@ setInterval(() => {
     if (year <= 2025) {
 
         // clear images from svg tag
-        var previousFlags;
+        var previousFlags = [];
         previousFlags = document.querySelectorAll('.flagImage');
         for (var i = 0; i < previousFlags.length; i++) {
             previousFlags[i].remove();
