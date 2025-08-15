@@ -115,8 +115,8 @@ const convertSvgToPng = () => {
 var year = 1952;
 
 // svg flag height
-const flagWidth = 63;
-const flagHeight = 47;
+const flagWidth = 76;
+const flagHeight = 57;
 
 // array to store space consumed by all flag images
 var lines = [];
