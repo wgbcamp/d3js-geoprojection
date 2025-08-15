@@ -119,9 +119,7 @@ const flagWidth = 63;
 const flagHeight = 47;
 
 // array to store space consumed by all flag images
-let rectangles = [];
 var lines = [];
-var flagsDrawn = 0;
 
 // placing source specific dots
 const dotPlacement = (x, y, color, multiplier) => {
@@ -140,6 +138,7 @@ setInterval(() => {
     if (year <= 2025) {
 
         var invalidSpaces = [];
+        var flagArray = [];
 
         // clear images from svg tag
         var previousFlags = [];
@@ -163,7 +162,7 @@ setInterval(() => {
 
                 // If currentFlag array length is greater than 0, then find if it exists.
                 // If currentFlag array length is 0, then push to array
-                if (currentFlags.length > 0) {
+                if (currentFlags.length) {
                     for (var g = 0; g < currentFlags.length; g++) {
 
                         // if flag name already exists in currentFlags array, then just set currentFlagIndex to its position
@@ -173,11 +172,10 @@ setInterval(() => {
                         }
                     }
 
-                    // if the currentFlagIndex was not updated, then push the commitment object's member property
-                    if (currentFlagIndex == 0) {
+                    if (!currentFlags.some(index => index.name === commitments[i].Member)){
                         currentFlags.push({name: commitments[i].Member, flagPosition: "", status: "none", typeArray: [], dotCount: 1});
                     }
-                } else {           
+                } else if (currentFlags.length == 0) {           
                     // push the commitment object's member property with a blank flagPosition value to the currentFlags array
                     currentFlags.push({name: commitments[i].Member, flagPosition: "", status: "none", typeArray: [], dotCount: 1});
                 }
@@ -253,7 +251,7 @@ setInterval(() => {
                                                 //     // newLine.x2 = newLine.x2 + 100;
                                                 // }
 
-                                                while ((Math.abs(invalidSpaces[f].x2 - newLine.x2) < 63) && (Math.abs(invalidSpaces[f].y2 - newLine.y2) < 47)) {
+                                                while ((Math.abs(invalidSpaces[f].x2 - newLine.x2) < flagWidth) && (Math.abs(invalidSpaces[f].y2 - newLine.y2) < flagHeight)) {
                                                     var sameAttemptDetect = false;
                                                     // if (attempts.length > 0) {
                                                     //     for (var z = 0; z < attempts.length; z++) {
@@ -269,15 +267,9 @@ setInterval(() => {
                                                     if (sameAttemptDetect == false) {
                                                         attempts.push(newLine);
                                                     }
-
                                                    
-                                                    console.log("YES");
-                                                    newLine.y2 = newLine.y2 -  100;
+                                                    newLine.y2 = newLine.y2 - 20;
                                                     f = 0;
-                                                }
-                                                if (commitments[i].Member == "Senegal" && f == invalidSpaces.length-1) {        
-                                                    console.log(`SENEGAL PASSED with a width check of ${Math.abs(invalidSpaces[f].x2 - newLine.x2)}
-                                                        and a height check of ${Math.abs(invalidSpaces[f].y2 - newLine.y2)}`);
                                                 }
                                             }
                                         }
@@ -287,8 +279,15 @@ setInterval(() => {
                                             invalidSpaces.push(newLine);
 
 
-                                         
-
+                                            // queue up flag values in an array
+                                            flagArray.push({
+                                                href: centroids[a].flag,
+                                                x: newLine.x2 - flagWidth /2,
+                                                y: newLine.y2 - flagHeight /2,
+                                                width: flagWidth,
+                                                height: flagHeight,
+                                                id: centroids[a].name
+                                            });
 
                                             // Draw the line
                                             svg.append("line")
@@ -308,40 +307,15 @@ setInterval(() => {
                                                 .attr("fill", "white")
                                                 .attr("class", "flagImage");
                                             
-                                            // append box shadow and then image
-                                            const defs = svg.append("defs");
 
-                                            const filter = defs.append("filter")
-                                                .attr("id", "boxShadow")
-                                                .attr("x", "-20%")
-                                                .attr("y", "-20%")
-                                                .attr("width", "140%")
-                                                .attr("height", "140%");
-
-                                            filter.append("feDropShadow")
-                                                .attr("dx", 0)
-                                                .attr("dy", 4)
-                                                .attr("stdDeviation", 6)
-                                                .attr("flood-color", "black")
-                                                .attr("flood-opacity", 0.3);
-
-                                            svg.append("image")
-                                                .attr("href", centroids[a].flag)
-                                                .attr("x", newLine.x2 - flagWidth /2)
-                                                .attr("y", newLine.y2 - flagHeight /2)
-                                                .attr("width", flagWidth)
-                                                .attr("height", flagHeight)
-                                                .attr("id", centroids[a].name)
-                                                .attr("class", "flagImage")
-                                                .attr("filter", "url(#boxShadow");
 
                                             // store the flag position of the last added element
-                                            if (currentFlags[flagArrayPosition].flagPosition == "") {
-                                                currentFlags[flagArrayPosition].flagPosition = {x: (newLine.x2 - flagWidth / 2), y: (newLine.y2 - flagHeight / 2)};
-                                            }
-                                            flagsDrawn++;
-                                            console.log("flagsDrawn");
-                                            console.log(flagsDrawn);
+                                            // if (currentFlags[flagArrayPosition].flagPosition == "") {
+                                            //     currentFlags[flagArrayPosition].flagPosition = {x: (newLine.x2 - flagWidth / 2), y: (newLine.y2 - flagHeight / 2)};
+                                            // }
+                                            // flagsDrawn++;
+                                            // console.log("flagsDrawn");
+                                            // console.log(flagsDrawn);
 
                                         //    dotPlacement(currentFlags[flagArrayPosition].flagPosition.x, 
                                         //     currentFlags[flagArrayPosition].flagPosition.y, 
@@ -357,6 +331,34 @@ setInterval(() => {
                     } 
                 }
             }
+        }
+        for (var n = 0; n < flagArray.length; n++) {
+            // append box shadow and then image
+            const defs = svg.append("defs");
+
+            const filter = defs.append("filter")
+                .attr("id", "boxShadow")
+                .attr("x", "-20%")
+                .attr("y", "-20%")
+                .attr("width", "140%")
+                .attr("height", "140%");
+
+            filter.append("feDropShadow")
+                .attr("dx", 0)
+                .attr("dy", 4)
+                .attr("stdDeviation", 6)
+                .attr("flood-color", "black")
+                .attr("flood-opacity", 0.3);
+
+            svg.append("image")
+                .attr("href", flagArray[n].href)
+                .attr("x", flagArray[n].x)
+                .attr("y", flagArray[n].y)
+                .attr("width", flagArray[n].width)
+                .attr("height", flagArray[n].height)
+                .attr("id", flagArray[n].id)
+                .attr("class", "flagImage")
+                .attr("filter", "url(#boxShadow");
         }
         // convertSvgToPng();
         year++;
