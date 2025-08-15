@@ -115,11 +115,13 @@ const convertSvgToPng = () => {
 var year = 1952;
 
 // svg flag height
-const flagWidth = 100;
-const flagHeight = 74;
+const flagWidth = 63;
+const flagHeight = 47;
 
-// array to store all drawn lines
-let lines = [];
+// array to store space consumed by all flag images
+let rectangles = [];
+var lines = [];
+var flagsDrawn = 0;
 
 // placing source specific dots
 const dotPlacement = (x, y, color, multiplier) => {
@@ -136,6 +138,8 @@ const dotPlacement = (x, y, color, multiplier) => {
 setInterval(() => {
     // stop counter when year hits 2025
     if (year <= 2025) {
+
+        var invalidSpaces = [];
 
         // clear images from svg tag
         var previousFlags = [];
@@ -200,13 +204,13 @@ setInterval(() => {
                                         // if commitment type is not included in the typeArray of the element in the currentFlags array
                                         // then run the dotPlacement function and add the type to the type array
                                         // this prevents multiple dots of the same color from appearing 
-                                        if (!currentFlags[e].typeArray.includes(types[b].name)) {
-                                        dotPlacement(currentFlags[currentFlagIndex].flagPosition.x,
-                                            currentFlags[currentFlagIndex].flagPosition.y,
-                                            types[b].color, currentFlags[e].dotCount
-                                        );
-                                        currentFlags[e].typeArray.push(types[b].name);   
-                                        }
+                                        // if (!currentFlags[e].typeArray.includes(types[b].name)) {
+                                        // dotPlacement(currentFlags[currentFlagIndex].flagPosition.x,
+                                        //     currentFlags[currentFlagIndex].flagPosition.y,
+                                        //     types[b].color, currentFlags[e].dotCount
+                                        // );
+                                        // currentFlags[e].typeArray.push(types[b].name);   
+                                        // }
   
                                         break;
                                     
@@ -218,47 +222,73 @@ setInterval(() => {
                                         break;
                                     }
                                 }
-
-
-                                //collision detection method
-
-                                // Function to check if two lines intersect
-                                function linesIntersect(l1, l2) {
-                                    function ccw(A, B, C) {
-                                        return (C[1] - A[1]) * (B[0] - A[0]) > (B[1] - A[1]) * (C[0] - A[0]);
-                                    }
-                                    return (
-                                        ccw([l1.x1, l1.y1], [l2.x1, l2.y1], [l2.x2, l2.y2]) !==
-                                        ccw([l1.x2, l1.y2], [l2.x1, l2.y1], [l2.x2, l2.y2]) &&
-                                        ccw([l1.x1, l1.y1], [l1.x2, l1.y2], [l2.x1, l2.y1]) !==
-                                        ccw([l1.x1, l1.y1], [l1.x2, l1.y2], [l2.x2, l2.y2])
-                                    );
-                                }
-
+                                                  
                                 // Function to draw a line without intersections
                                 function drawNonIntersectingLine(startX, startY, flagArrayPosition) {
-                                    let attempts = 0;
-                                    while (attempts < 1000) {
-                                        let length = 50 + Math.random() * 100; // random length
-                                        let angle = Math.random() * 2 * Math.PI; // random direction
-                                        let endX = startX + Math.cos(angle) * length;
-                                        let endY = startY + Math.sin(angle) * length;
+                                    // let attempts = 0;
+                                    // while (attempts < 1000) {
+                                        var length = 50; 
+                                        let endX = startX;
+                                        let endY = startY - length;
 
-                                        let newLine = { x1: startX, y1: startY, x2: endX, y2: endY };
+                                        var newLine = { x1: startX, y1: startY, x2: endX, y2: endY };
+                                        // var newRect = { yMin: newLine.y2 - flagHeight / 2, 
+                                        //                 yMax: newLine.y2 + flagHeight / 2,
+                                        //                 xMin: newLine.x2 - flagWidth / 2,
+                                        //                 xMax: newLine.x2 + flagWidth / 2
+                                        //                 };
 
-                                        let intersects = lines.some(line => linesIntersect(line, newLine));
+                                        var attempts = [];
+                                        if (invalidSpaces == []) {
 
-                                        if (!intersects) {
-                                            // Store the line
+                                        } else {
+                                            for (var f = 0; f < invalidSpaces.length; f++) {
+                                                // while (Math.abs(invalidSpaces[f].x2 - newLine.x2) < 63) {
+                                                //     newLine.x2 = newLine.x2 + Math.random() * 100;
+                                                //     invalidSpaces.push(newLine);
+                                                // }            
+                                                // if ((Math.abs(invalidSpaces[f].x2 - newLine.x2) < 63) && (Math.abs(invalidSpaces[f].y2 - newLine.y2) < 47)) {
+                                                //     console.log("YES");
+                                                //     // invalidSpaces.push(newLine);
+                                                //     // newLine.x2 = newLine.x2 + 100;
+                                                // }
+
+                                                while ((Math.abs(invalidSpaces[f].x2 - newLine.x2) < 63) && (Math.abs(invalidSpaces[f].y2 - newLine.y2) < 47)) {
+                                                    var sameAttemptDetect = false;
+                                                    // if (attempts.length > 0) {
+                                                    //     for (var z = 0; z < attempts.length; z++) {
+                                                    //         if (newLine == attempts[z]) {
+                                                    //             console.log("same attempt detected");
+                                                    //             console.log(newLine);
+                                                    //             sameAttemptDetect = true;
+                                                    //             break;
+                                                    //         }
+                                                    //     }
+                                                    // }
+
+                                                    if (sameAttemptDetect == false) {
+                                                        attempts.push(newLine);
+                                                    }
+
+                                                   
+                                                    console.log("YES");
+                                                    newLine.y2 = newLine.y2 -  100;
+                                                    f = 0;
+                                                }
+                                                if (commitments[i].Member == "Senegal" && f == invalidSpaces.length-1) {        
+                                                    console.log(`SENEGAL PASSED with a width check of ${Math.abs(invalidSpaces[f].x2 - newLine.x2)}
+                                                        and a height check of ${Math.abs(invalidSpaces[f].y2 - newLine.y2)}`);
+                                                }
+                                            }
+                                        }
+
+                                            // push to lines array
                                             lines.push(newLine);
+                                            invalidSpaces.push(newLine);
 
-                                            // Make the circle...
-                                            // svg.append("circle")
-                                            //     .attr("cx", (centroids[a].coordinates[0] - (flagWidth / 2)) + (flagWidth / 2))
-                                            //     .attr("cy", (centroids[a].coordinates[1] - (flagHeight / 2)) + (flagHeight / 2))
-                                            //     .attr("r", 10)
-                                            //     .attr("fill", types[b].color)
-                                            //     .attr("class", "flagImage");
+
+                                         
+
 
                                             // Draw the line
                                             svg.append("line")
@@ -266,10 +296,18 @@ setInterval(() => {
                                                 .attr("y1", newLine.y1)
                                                 .attr("x2", newLine.x2)
                                                 .attr("y2", newLine.y2)
-                                                .attr("stroke", "black")
+                                                .attr("stroke", "rgb(180, 180, 180")
                                                 .attr("stroke-width", 2)
                                                 .attr("class", "flagImage");
-
+                                            
+                                            // Make the circle...
+                                            svg.append("circle")
+                                                .attr("cx", (centroids[a].coordinates[0] - (flagWidth / 2)) + (flagWidth / 2))
+                                                .attr("cy", (centroids[a].coordinates[1] - (flagHeight / 2)) + (flagHeight / 2))
+                                                .attr("r", 5)
+                                                .attr("fill", "white")
+                                                .attr("class", "flagImage");
+                                            
                                             // append box shadow and then image
                                             const defs = svg.append("defs");
 
@@ -301,16 +339,18 @@ setInterval(() => {
                                             if (currentFlags[flagArrayPosition].flagPosition == "") {
                                                 currentFlags[flagArrayPosition].flagPosition = {x: (newLine.x2 - flagWidth / 2), y: (newLine.y2 - flagHeight / 2)};
                                             }
+                                            flagsDrawn++;
+                                            console.log("flagsDrawn");
+                                            console.log(flagsDrawn);
 
-                                           dotPlacement(currentFlags[flagArrayPosition].flagPosition.x, 
-                                            currentFlags[flagArrayPosition].flagPosition.y, 
-                                            types[b].color, 1
-                                            );
+                                        //    dotPlacement(currentFlags[flagArrayPosition].flagPosition.x, 
+                                        //     currentFlags[flagArrayPosition].flagPosition.y, 
+                                        //     types[b].color, 1
+                                        //     );
                                             return; // done
-                                        }
-                                        attempts++;
-                                    }
-                                    console.warn("Could not place a non-intersecting line after many tries.");
+                                        
+                                    // }
+                                    // console.warn("Could not place a non-intersecting line after many tries.");
                                 }                                                         
                             }
                         }
@@ -323,7 +363,7 @@ setInterval(() => {
     } else {
         // mediaRecorder.stop();
     }
-}, 1000, year);
+}, 2000, year);
 
 
 // append svg to #map div
