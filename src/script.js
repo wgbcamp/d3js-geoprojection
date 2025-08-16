@@ -37,32 +37,33 @@ var types = [
 
 // fetch geoJson file
 const dataPoints = async () => {
-    var getData = await fetch('/d3js-geoprojection/countries.json');
+    var getData = await fetch('/d3js-geoprojection/countries_no_antarctica.json');
     geoJson = await getData.json();
     console.log("geoJson:")
     console.log(geoJson);
-    var getBackground = await fetch('/d3js-geoprojection/land.json');
+    var getBackground = await fetch('/d3js-geoprojection/land_no_antarctica.json');
     background = await getBackground.json();
     console.log("background:")
     console.log(background);
 
-    var getCommmitments = await fetch(`/d3js-geoprojection/output.json`);
+    var getCommmitments = await fetch(`/d3js-geoprojection/commitments.json`);
     commitments = await getCommmitments.json();
 
     // assign projection and path values
-    projection = d3.geoNaturalEarth1().fitSize([width, 2860], geoJson).rotate([-10, 0]);
+    projection = d3.geoNaturalEarth1().fitSize([width, height], geoJson).rotate([-10, 0]);
     path = d3.geoPath().projection(projection);
-    backgroundProjection = d3.geoNaturalEarth1().fitSize([width, 2860], background).rotate([-10, 0]);
+    backgroundProjection = d3.geoNaturalEarth1().fitSize([width, height], background).rotate([-10, 0]);
     backgroundPath = d3.geoPath().projection(backgroundProjection);
 
     // calculate centroids for every country
     for (var i = 0; i < geoJson.features.length; i++) {
         for (var a = 0; a < commitments.length; a++) {
-            if (geoJson.features[i].properties.ADMIN == commitments[a].Member) {
+            if (geoJson.features[i].properties.ADM0_A3 == commitments[a].Country) {
                 centroids.push({
                     coordinates: path.centroid(geoJson.features[i]),
                     name: geoJson.features[i].properties.ADMIN,
-                    flag: `/d3js-geoprojection/flags/${geoJson.features[i].properties.ADMIN.replaceAll(/[- ]/g, "_").toLowerCase()}.png`
+                    iso: commitments[a].Country,
+                    flag: `/d3js-geoprojection/flags/${commitments[a].Member.toLowerCase()}.png`
                 });
                 // console.log(geoJson.features[i].properties.ADMIN.replaceAll(/[- ]/g, "_").toLowerCase());
                 break;
@@ -137,6 +138,8 @@ setInterval(() => {
     // stop counter when year hits 2025
     if (year <= 2025) {
 
+        console.log(year);
+
         var invalidSpaces = [];
         var flagArray = [];
 
@@ -152,13 +155,14 @@ setInterval(() => {
 
         // loop through the commitments json object
         for (var i = 0; i < commitments.length; i++) {
-            
+
             // track the array element that represents the current flag for the current commitment
             var currentFlagIndex = 0;
 
             // only continue the rest of the code block if the commitment object's year property matches
             if (commitments[i].Year == year) {
                 // console.log(commitments[i]);
+                console.log(commitments[i].Member);
 
                 // If currentFlag array length is greater than 0, then find if it exists.
                 // If currentFlag array length is 0, then push to array
@@ -184,7 +188,7 @@ setInterval(() => {
                 for (var a = 0; a < centroids.length; a++) {
                     
                     // run code only if the member property matches a centroids name property
-                    if (commitments[i].Member == centroids[a].name) {     
+                    if (commitments[i].Country == centroids[a].iso) {     
 
                         // loop through the loan types array
                         for (var b = 0; b < types.length; b++) {
@@ -361,11 +365,11 @@ setInterval(() => {
                 .attr("filter", "url(#boxShadow");
         }
         // convertSvgToPng();
-        year++;
+                    year++;
     } else {
         // mediaRecorder.stop();
     }
-}, 2000, year);
+}, 3000, year);
 
 
 // append svg to #map div
