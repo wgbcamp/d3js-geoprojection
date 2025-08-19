@@ -364,12 +364,12 @@ setInterval(() => {
                 .attr("class", "flagImage")
                 .attr("filter", "url(#boxShadow");
         }
-        // convertSvgToPng();
-                    year++;
+        convertSvgToPng();
+                    // year++;
     } else {
         // mediaRecorder.stop();
     }
-}, 3000, year);
+}, 5000, year);
 
 
 // append svg to #map div
